@@ -1,0 +1,28 @@
+{
+  "name": "commerce-e2e-framework",
+  "version": "0.1.0",
+  "description": "Layered QA automation framework (Playwright UI E2E + API, Newman contract, k6 performance) against the Toolshop commerce app",
+  "author": "Farhan (Trancend1)",
+  "license": "MIT",
+  "scripts": {
+    "test:ui": "playwright test tests/ui --project=chromium",
+    "test:ui:all-browsers": "playwright test tests/ui",
+    "test:api": "playwright test tests/api --project=api",
+    "test:contract": "newman run tests/api/toolshop.postman_collection.json -e tests/api/local.postman_environment.json",
+    "test:smoke": "playwright test --grep @smoke --project=chromium",
+    "test:perf": "k6 run tests/performance/login.smoke.js",
+    "report": "playwright show-report",
+    "lint": "eslint . && prettier --check ."
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^20.19.43",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "newman": "^6.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  }
+}
