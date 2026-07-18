@@ -86,7 +86,7 @@ Universal checklist — must pass before any milestone is considered exited:
 
 **Active phase:** M1 — Foundation
 
-**Sprint focus:** Local foundation is done (2026-07-18): pinned compose + `scripts/sut-up.sh` boots and seeds the SUT, lockfile + ESLint/Prettier configs committed, and both M1 specs (login UI, products API) pass locally. Remaining: push to GitHub and get `e2e.yml` green on a real PR.
+**Sprint focus:** All M1 exit criteria met (2026-07-18): repo public on GitHub, `e2e.yml` green (run 29644067807). Formal phase-gate sign-off (§2.2 — critic review) is the orchestrator's call; then M2 starts.
 
 **Cleared blockers (2026-07-18):**
 
@@ -97,7 +97,6 @@ Universal checklist — must pass before any milestone is considered exited:
 **Still open:**
 
 4. `test:contract` references `tests/api/toolshop.postman_collection.json` which does not exist (M2 deliverable — the script will fail until then).
-5. Repo not yet pushed to GitHub → `e2e.yml` never exercised in CI.
 
 **Orchestrator:** Farhan
 
@@ -107,11 +106,11 @@ Universal checklist — must pass before any milestone is considered exited:
 
 M1 exits only when:
 
-- [ ] `docker compose up -d` boots a working Toolshop (UI :4200, API :8091) with pinned image tags
-- [ ] `npm ci && npm run lint` passes locally (lockfile + lint config committed)
-- [ ] `tests/ui/login.spec.ts` and `tests/api/products.api.spec.ts` pass against the local SUT
-- [ ] `e2e.yml` green on GitHub Actions for a real PR
-- [ ] Repo pushed to `github.com/Trancend1/commerce-e2e-framework` with badges resolving
+- [x] `bash scripts/sut-up.sh` boots a working Toolshop (UI :4200, API :8091) with pinned image tags
+- [x] `npm ci && npm run lint` passes locally (lockfile + lint config committed)
+- [x] `tests/ui/login.spec.ts` and `tests/api/products.api.spec.ts` pass against the local SUT
+- [x] `e2e.yml` green on GitHub Actions (run 29644067807, push to `main`, 2026-07-18)
+- [x] Repo pushed to `github.com/Trancend1/commerce-e2e-framework` (public) with badges resolving
 
 ### 2.5 Phase Log
 

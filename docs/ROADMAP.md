@@ -4,11 +4,11 @@
 
 ## M1 — Foundation
 
-- [ ] Repo scaffold, lint config, strict tsconfig
-- [ ] `docker-compose.yml` boots pinned Toolshop + healthcheck
-- [ ] `config/env.ts` typed env loading
-- [ ] 1 passing UI spec (login) + 1 passing API spec (products contract)
-- [ ] `e2e.yml` PR gate green end-to-end
+- [x] Repo scaffold, lint config, strict tsconfig
+- [x] `docker-compose.yml` boots pinned Toolshop + healthcheck
+- [x] `config/env.ts` typed env loading
+- [x] 1 passing UI spec (login) + 1 passing API spec (products contract)
+- [x] `e2e.yml` PR gate green end-to-end ([run 29644067807](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/29644067807))
 
 ## M2 — Core coverage
 
