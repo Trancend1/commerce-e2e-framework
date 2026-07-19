@@ -3,7 +3,7 @@
 Layered QA automation portfolio project (Playwright UI E2E + API, Newman contract, k6 performance) against the Toolshop commerce app — built to demonstrate QA automation as an engineering discipline for a QA internship portfolio. It is NOT a product, a Toolshop fork, or an exhaustive test suite: coverage is risk-based, and the framework itself is the deliverable.
 
 > **Current Orchestrator:** Farhan ([@Trancend1](https://github.com/Trancend1))
-> **Active Sprint/Phase:** M1 — Foundation
+> **Active Sprint/Phase:** M2 — Core coverage
 
 ---
 
@@ -84,39 +84,31 @@ Universal checklist — must pass before any milestone is considered exited:
 
 ### 2.3 Active Phase
 
-**Active phase:** M1 — Foundation
+**Active phase:** M2 — Core coverage
 
-**Sprint focus:** All M1 exit criteria met (2026-07-18): repo public on GitHub, `e2e.yml` green (run 29644067807). Formal phase-gate sign-off (§2.2 — critic review) is the orchestrator's call; then M2 starts.
-
-**Cleared blockers (2026-07-18):**
-
-1. ~~Placeholder docker-compose~~ → images pinned to upstream release 2.3 (`web` vendored in `docker/web/` — upstream's prebuilt web image is arm64-only); `scripts/sut-up.sh` boots, waits, and runs `migrate:fresh --seed`. Verified locally: API `/status` 200, UI on :4200.
-2. ~~No lockfile~~ → `npm install` run, `package-lock.json` committed.
-3. ~~No lint config~~ → `eslint.config.mjs` (flat, ESLint 9) + `.prettierrc`; `tsc --noEmit`, `eslint .`, `prettier --check .` all clean.
-
-**Still open:**
-
-4. `test:contract` references `tests/api/toolshop.postman_collection.json` which does not exist (M2 deliverable — the script will fail until then).
+**Sprint focus:** POMs for the main journeys (Register, Catalog, Product, Cart, Checkout), UI journeys (register, search/filter, cart ops, checkout happy path), API contract + integration + negative suites, auth `storageState` reuse via custom fixtures, and the Newman collection mirrored from Swagger (fixes the dangling `test:contract` script from M1).
 
 **Orchestrator:** Farhan
 
-**Next:** After M1 exits, start M2 with the Catalog/Cart POMs and the register + checkout journeys.
+**Next:** After M2 exits, start M3 (sharded PR gate < 10 min, nightly 3-browser matrix, Allure on Pages, quarantine mechanism).
 
 ### 2.4 Exit Criteria
 
-M1 exits only when:
+M2 exits only when:
 
-- [x] `bash scripts/sut-up.sh` boots a working Toolshop (UI :4200, API :8091) with pinned image tags
-- [x] `npm ci && npm run lint` passes locally (lockfile + lint config committed)
-- [x] `tests/ui/login.spec.ts` and `tests/api/products.api.spec.ts` pass against the local SUT
-- [x] `e2e.yml` green on GitHub Actions (run 29644067807, push to `main`, 2026-07-18)
-- [x] Repo pushed to `github.com/Trancend1/commerce-e2e-framework` (public) with badges resolving
+- [ ] POMs exist for Register, Catalog, Product, Cart, Checkout (locators only, `data-test` via `getByTestId`)
+- [ ] UI journeys pass locally against the SUT: register, search/filter, cart ops, checkout happy path (`@smoke` set tagged)
+- [ ] API suites pass: contract (products/brands/categories), integration (auth chain, cart→checkout), negative pack
+- [ ] `npm run test:contract` (Newman) passes against the local SUT
+- [ ] Auth `storageState` reuse working via custom fixture (no per-test UI login for authenticated journeys)
+- [ ] Full suite green locally AND `e2e.yml` green on GitHub Actions
 
 ### 2.5 Phase Log
 
-| Phase | Status | Lesson                                                                                                                                                                        | Carry-forward                                                                                                  |
-| ----- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| M1    | Active | Skeleton scaffolded before git init — verify repo hygiene first. Upstream prebuilt images can be single-arch (web was arm64-only) — always verify architecture before pinning | Push to GitHub + green `e2e.yml` run; Playwright `testIdAttribute` must stay `data-test` (Toolshop convention) |
+| Phase | Status                | Lesson                                                                                                                                                                        | Carry-forward                                                                                                                                     |
+| ----- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1    | Complete (2026-07-19) | Skeleton scaffolded before git init — verify repo hygiene first. Upstream prebuilt images can be single-arch (web was arm64-only) — always verify architecture before pinning | Playwright `testIdAttribute` must stay `data-test` (Toolshop convention); `test:contract` script dangling until M2 delivers the Newman collection |
+| M2    | Active                | —                                                                                                                                                                             | —                                                                                                                                                 |
 
 ---
 
