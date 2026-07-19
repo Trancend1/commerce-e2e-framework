@@ -16,9 +16,25 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
+    { name: 'setup', testDir: './tests/setup', testMatch: /.*\.setup\.ts/ },
     { name: 'api', testDir: './tests/api', use: { baseURL: env.apiUrl } },
-    { name: 'chromium', testDir: './tests/ui', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', testDir: './tests/ui', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', testDir: './tests/ui', use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'chromium',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'firefox',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'webkit',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
+    },
   ],
 });
