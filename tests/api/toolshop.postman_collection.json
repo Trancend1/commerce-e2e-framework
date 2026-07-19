@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Toolshop API — contract (mirrored from Swagger)",
+    "description": "Contract checks for the Toolshop REST API, mirrored from the upstream OpenAPI spec (GET http://localhost:8091/docs?api-docs.json). Run with: npm run test:contract",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /status",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET /products",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('returns paginated data array', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data).to.be.an('array').that.is.not.empty;",
+                  "});",
+                  "pm.test('every product has id, name, price', () => {",
+                  "  for (const p of pm.response.json().data) {",
+                  "    pm.expect(p).to.include.keys('id', 'name', 'price');",
+                  "    pm.expect(p.name).to.be.a('string');",
+                  "    pm.expect(p.price).to.be.a('number');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /products/search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{apiUrl}}/products/search?q=pliers",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "search"],
+              "query": [{ "key": "q", "value": "pliers" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('search returns a data array', () => {",
+                  "  pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /products/{id} — unknown id (negative)",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/products/does-not-exist-999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('unknown product id returns 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brands",
+      "item": [
+        {
+          "name": "GET /brands",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/brands"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('every brand has id, name, slug', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array').that.is.not.empty;",
+                  "  for (const b of body) pm.expect(b).to.include.keys('id', 'name', 'slug');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "GET /categories/tree",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/categories/tree"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('every category has id, name, slug and sub_categories', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array').that.is.not.empty;",
+                  "  for (const c of body) {",
+                  "    pm.expect(c).to.include.keys('id', 'name', 'slug');",
+                  "    pm.expect(c.sub_categories).to.be.an('array');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /users/login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{customerEmail}}\", \"password\": \"{{customerPassword}}\"}"
+            },
+            "url": "{{apiUrl}}/users/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('returns an access token', () => {",
+                  "  const token = pm.response.json().access_token;",
+                  "  pm.expect(token).to.be.a('string').that.is.not.empty;",
+                  "  pm.environment.set('accessToken', token);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users/me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{apiUrl}}/users/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('profile email matches the login', () => {",
+                  "  pm.expect(pm.response.json().email).to.eql(pm.environment.get('customerEmail'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users/me — no token (negative)",
+          "request": {
+            "method": "GET",
+            "url": "{{apiUrl}}/users/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('missing token returns 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
