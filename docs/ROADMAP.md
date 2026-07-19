@@ -12,11 +12,11 @@
 
 ## M2 — Core coverage
 
-- [ ] POM: Login, Catalog, Product, Cart, Checkout pages
-- [ ] Journeys: register, search/filter, cart ops, checkout happy path (`@smoke` set defined)
-- [ ] API suite: contract (products/brands/categories) + integration (auth chain, cart→checkout) + negative pack
-- [ ] Newman collection mirrored from Swagger
-- [ ] `apiClient`, `dataFactory`, auth `storageState` reuse
+- [x] POM: Login, Catalog, Product, Cart, Checkout pages
+- [x] Journeys: register, search/filter, cart ops, checkout happy path (`@smoke` set defined)
+- [x] API suite: contract (products/brands/categories) + integration (auth chain, cart→checkout) + negative pack
+- [x] Newman collection mirrored from Swagger ([run 29688379856](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/29688379856))
+- [x] `apiClient`, `dataFactory`, auth `storageState` reuse
 
 ## M3 — Quality gates
 

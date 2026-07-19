@@ -86,7 +86,7 @@ Universal checklist — must pass before any milestone is considered exited:
 
 **Active phase:** M2 — Core coverage
 
-**Sprint focus:** POMs for the main journeys (Register, Catalog, Product, Cart, Checkout), UI journeys (register, search/filter, cart ops, checkout happy path), API contract + integration + negative suites, auth `storageState` reuse via custom fixtures, and the Newman collection mirrored from Swagger (fixes the dangling `test:contract` script from M1).
+**Sprint focus:** All M2 deliverables landed and green (2026-07-19, run 29688379856): journey POMs, UI journeys, API contract/integration/negative suites, auth `storageState` reuse, Newman collection in the PR gate. Formal phase-gate sign-off (§2.2 — critic review) is the orchestrator's call; then M3 starts.
 
 **Orchestrator:** Farhan
 
@@ -96,12 +96,12 @@ Universal checklist — must pass before any milestone is considered exited:
 
 M2 exits only when:
 
-- [ ] POMs exist for Register, Catalog, Product, Cart, Checkout (locators only, `data-test` via `getByTestId`)
-- [ ] UI journeys pass locally against the SUT: register, search/filter, cart ops, checkout happy path (`@smoke` set tagged)
-- [ ] API suites pass: contract (products/brands/categories), integration (auth chain, cart→checkout), negative pack
-- [ ] `npm run test:contract` (Newman) passes against the local SUT
-- [ ] Auth `storageState` reuse working via custom fixture (no per-test UI login for authenticated journeys)
-- [ ] Full suite green locally AND `e2e.yml` green on GitHub Actions
+- [x] POMs exist for Register, Catalog, Product, Cart, Checkout (locators only, `data-test` via `getByTestId`)
+- [x] UI journeys pass locally against the SUT: register, search/filter, cart ops, checkout happy path (`@smoke` set tagged)
+- [x] API suites pass: contract (products/brands/categories), integration (auth chain, cart→checkout), negative pack
+- [x] `npm run test:contract` (Newman) passes against the local SUT (also wired into the PR gate)
+- [x] Auth `storageState` reuse working via custom fixture (no per-test UI login for authenticated journeys)
+- [x] Full suite green locally (35/35, 3 browsers) AND `e2e.yml` green (run 29688379856, 2026-07-19); 3-browser matrix stays a nightly concern
 
 ### 2.5 Phase Log
 
