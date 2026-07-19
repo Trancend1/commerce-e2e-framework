@@ -32,6 +32,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: bash scripts/sut-up.sh
       - run: npm run test:api
+      - run: npm run test:contract
       - run: npx playwright test --grep @smoke --project=chromium --shard=${{ matrix.shard }}
       - uses: actions/upload-artifact@v4
         if: failure()
