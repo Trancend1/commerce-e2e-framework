@@ -21,7 +21,7 @@
 ## M3 — Quality gates
 
 - [ ] PR gate sharded (2×), budget < 10 min enforced
-- [ ] `nightly.yml` 3-browser matrix
+- [x] `nightly.yml` 3-browser matrix ([run 30286717667](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30286717667))
 - [ ] Allure build + GitHub Pages deploy + README badge/link
 - [ ] Quarantine mechanism (`@quarantine` tag excluded from gates)
 
