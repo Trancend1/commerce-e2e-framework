@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { type Address } from '../utils/dataFactory';
+import { waitForRequestsToSettle } from '../utils/waits';
 
 export type PaymentMethod =
   'bank-transfer' | 'cash-on-delivery' | 'credit-card' | 'buy-now-pay-later' | 'gift-card';
@@ -38,12 +39,18 @@ export class CheckoutPage {
   }
 
   async fillBillingAddress(address: Address): Promise<void> {
-    await this.streetInput.fill(address.street);
-    await this.cityInput.fill(address.city);
-    await this.stateInput.fill(address.state);
+    // Country + postal code + house number trigger an async GET /postcode-lookup cascade that
+    // patches this form (the first response re-triggers a second lookup). Fill them first and
+    // let it settle, so the fields below hold our values and the caller's "Proceed" click
+    // cannot race the patch — that race silently strands the wizard on the billing step.
     await this.countrySelect.selectOption({ label: address.country });
     await this.postalCodeInput.fill(address.postal_code);
     await this.houseNumberInput.fill(address.house_number);
+    await waitForRequestsToSettle(this.page, '/postcode-lookup');
+
+    await this.streetInput.fill(address.street);
+    await this.cityInput.fill(address.city);
+    await this.stateInput.fill(address.state);
   }
 
   async proceedToPayment(): Promise<void> {
