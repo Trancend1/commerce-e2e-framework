@@ -84,31 +84,31 @@ Universal checklist — must pass before any milestone is considered exited:
 
 ### 2.3 Active Phase
 
-**Active phase:** M2 — Core coverage
+**Active phase:** M3 — Quality gates
 
-**Sprint focus:** All M2 deliverables landed and green (2026-07-19, run 29688379856): journey POMs, UI journeys, API contract/integration/negative suites, auth `storageState` reuse, Newman collection in the PR gate. Formal phase-gate sign-off (§2.2 — critic review) is the orchestrator's call; then M3 starts.
+**Sprint focus:** M2 closed 2026-07-28 (§2.5). M3 gates: the PR gate is sharded 2× with the < 10 min budget now enforced by job timeouts, and the nightly 3-browser matrix genuinely runs all three engines. Remaining: Allure on GitHub Pages and the quarantine mechanism.
 
 **Orchestrator:** Farhan
 
-**Next:** After M2 exits, start M3 (sharded PR gate < 10 min, nightly 3-browser matrix, Allure on Pages, quarantine mechanism).
+**Next:** After M3 exits, start M4 (k6 thresholds, axe-core a11y, visual regression).
 
 ### 2.4 Exit Criteria
 
-M2 exits only when:
+M3 exits only when:
 
-- [x] POMs exist for Register, Catalog, Product, Cart, Checkout (locators only, `data-test` via `getByTestId`)
-- [x] UI journeys pass locally against the SUT: register, search/filter, cart ops, checkout happy path (`@smoke` set tagged)
-- [x] API suites pass: contract (products/brands/categories), integration (auth chain, cart→checkout), negative pack
-- [x] `npm run test:contract` (Newman) passes against the local SUT (also wired into the PR gate)
-- [x] Auth `storageState` reuse working via custom fixture (no per-test UI login for authenticated journeys)
-- [x] Full suite green locally (35/35, 3 browsers) AND `e2e.yml` green (run 29688379856, 2026-07-19); 3-browser matrix stays a nightly concern
+- [x] PR gate sharded (2×) with the < 10 min budget enforced, not merely observed (run 30287558238)
+- [x] `nightly.yml` runs all three browsers green, verified at shard level rather than by job conclusion (run 30286717667)
+- [ ] Allure report builds from merged shard results, deploys to GitHub Pages, linked from README
+- [ ] Quarantine mechanism: `@quarantine` excluded from gates, quarantined tests still visible in reporting
+- [ ] Flake rate observable — `retries: 2` currently reports a flaky pass as green, so the < 2% budget in `docs/TEST-STRATEGY.md` has no measurement behind it
 
 ### 2.5 Phase Log
 
-| Phase | Status                | Lesson                                                                                                                                                                        | Carry-forward                                                                                                                                     |
-| ----- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| M1    | Complete (2026-07-19) | Skeleton scaffolded before git init — verify repo hygiene first. Upstream prebuilt images can be single-arch (web was arm64-only) — always verify architecture before pinning | Playwright `testIdAttribute` must stay `data-test` (Toolshop convention); `test:contract` script dangling until M2 delivers the Newman collection |
-| M2    | Active                | —                                                                                                                                                                             | —                                                                                                                                                 |
+| Phase | Status                | Lesson                                                                                                                                                                                                                                                                        | Carry-forward                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1    | Complete (2026-07-19) | Skeleton scaffolded before git init — verify repo hygiene first. Upstream prebuilt images can be single-arch (web was arm64-only) — always verify architecture before pinning                                                                                                 | Playwright `testIdAttribute` must stay `data-test` (Toolshop convention); `test:contract` script dangling until M2 delivers the Newman collection                                                                                                                                                                                                                                                                                                                                                                                  |
+| M2    | Complete (2026-07-28) | A green pipeline is not evidence the suite ran. The nightly matrix was red for 5 straight nights with only chromium ever executing, and `retries: 2` reported a real race as a green pass — both invisible unless you read shard-level test counts instead of job conclusions | Critic findings below, none blocking: `ApiClient.get()` is dead code and the ADR-002 "seeding foundation" is still unrealised; `login.spec.ts` builds its POM by hand instead of using the fixture; `cart.spec.ts` asserts the total with `toContainText`, so "30.00" also matches "130.00"; `catalog.spec.ts` category filter assumes the first Hammer product has "Hammer" in its name; `categories.api.spec.ts` has no 404 case while brands/products do; `utils/waits.ts` was specified in §4.2 from M1 but only created in M3 |
+| M3    | Active                | —                                                                                                                                                                                                                                                                             | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ---
 
