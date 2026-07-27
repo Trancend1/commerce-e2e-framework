@@ -18,8 +18,11 @@ test.describe('Categories API — contract', () => {
     }
   });
 
-  test('GET /categories/{id} with unknown id returns 404 @regression', async ({ request }) => {
-    const res = await request.get('/categories/does-not-exist-999999');
+  // NOTE: unlike brands and products, categories exposes no GET /categories/{id} — that path is
+  // documented for PUT/DELETE only, so GET on it correctly answers 405, not 404. The single-item
+  // read surface is /categories/tree/{id}, which is where the unknown-id case belongs.
+  test('GET /categories/tree/{id} with unknown id returns 404 @regression', async ({ request }) => {
+    const res = await request.get('/categories/tree/does-not-exist-999999');
 
     expect(res.status()).toBe(404);
   });
