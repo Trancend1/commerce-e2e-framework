@@ -18,7 +18,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      # The `setup` project (auth storageState) has no browser configured, so it runs on
+      # chromium for every shard — install it alongside the matrix browser or firefox/webkit
+      # fail in setup before any test runs. Duplicate args are deduped by Playwright.
+      - run: npx playwright install --with-deps chromium ${{ matrix.browser }}
       - run: bash scripts/sut-up.sh
       - run: npx playwright test tests/ui --project=${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
