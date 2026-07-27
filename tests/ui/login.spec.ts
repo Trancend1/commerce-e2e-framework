@@ -1,10 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
+import { test, expect } from '../../fixtures/pages.fixture';
 import { env } from '../../config/env';
 
 test.describe('Authentication', () => {
-  test('logs in with valid customer credentials @smoke', async ({ page }) => {
-    const loginPage = new LoginPage(page);
+  test('logs in with valid customer credentials @smoke', async ({ loginPage, page }) => {
     await loginPage.goto();
 
     await loginPage.loginAs(env.customerEmail, env.customerPassword);
@@ -12,8 +10,7 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL(/\/account/);
   });
 
-  test('rejects login with invalid password @regression', async ({ page }) => {
-    const loginPage = new LoginPage(page);
+  test('rejects login with invalid password @regression', async ({ loginPage }) => {
     await loginPage.goto();
 
     await loginPage.loginAs(env.customerEmail, 'definitely-wrong');

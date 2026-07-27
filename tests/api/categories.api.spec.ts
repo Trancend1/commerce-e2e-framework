@@ -18,6 +18,12 @@ test.describe('Categories API — contract', () => {
     }
   });
 
+  test('GET /categories/{id} with unknown id returns 404 @regression', async ({ request }) => {
+    const res = await request.get('/categories/does-not-exist-999999');
+
+    expect(res.status()).toBe(404);
+  });
+
   // NOTE: POST /categories intentionally requires no auth in the upstream Swagger spec,
   // so the negative case here is payload validation, not authorization.
   test('POST /categories with an empty payload returns 422 @regression', async ({ request }) => {

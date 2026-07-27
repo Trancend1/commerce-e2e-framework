@@ -1,12 +1,14 @@
 import { request, type APIRequestContext } from '@playwright/test';
 import { env } from '../config/env';
 
-/** Thin typed wrapper over the Toolshop REST API — login → Bearer token, CRUD helpers.
- *  Foundation for both API specs and data seeding (docs/adr/ADR-002). */
+/** Thin typed wrapper over the Toolshop REST API — logs in, then issues authenticated writes.
+ *  ADR-002 designates this the seeding entry point, but seeding is not built yet: only the
+ *  write path has a caller. Read helpers get added when something needs them, not kept as
+ *  dead code that nothing exercises. */
 export class ApiClient {
   private constructor(
     private readonly ctx: APIRequestContext,
-    readonly token: string,
+    private readonly token: string,
   ) {}
 
   static async loginAs(email: string, password: string): Promise<ApiClient> {
@@ -19,10 +21,6 @@ export class ApiClient {
 
   private authHeaders() {
     return { Authorization: `Bearer ${this.token}` };
-  }
-
-  async get(path: string) {
-    return this.ctx.get(path, { headers: this.authHeaders() });
   }
 
   async post(path: string, data: unknown) {
