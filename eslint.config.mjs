@@ -28,4 +28,12 @@ export default [
     files: ['tests/performance/**/*.js'],
     languageOptions: { sourceType: 'module', globals: { __ENV: 'readonly' } },
   },
+  {
+    // CI helper scripts run under Node
+    files: ['scripts/**/*.mjs', 'eslint.config.mjs'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: { process: 'readonly', console: 'readonly' },
+    },
+  },
 ];

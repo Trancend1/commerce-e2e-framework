@@ -1,13 +1,24 @@
 import { defineConfig, devices } from '@playwright/test';
 import { env } from './config/env';
 
+/** Quarantined tests are excluded here, in config, rather than by adding --grep-invert to each
+ *  CI command — a workflow that forgets the flag would leak them back into a gate silently.
+ *  They still run nightly via the quarantine-* projects. See docs/TEST-STRATEGY.md. */
+const QUARANTINE = /@quarantine/;
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI ? [['html'], ['github']] : [['html']],
+  // json is always on: scripts/check-flake.mjs reads it to enforce the zero-flaky budget, and a
+  // reporter that only exists in CI cannot be verified locally before you push.
+  reporter: [
+    ['html'],
+    ['json', { outputFile: process.env.PW_JSON_REPORT ?? 'test-results/report.json' }],
+    ...(process.env.CI ? [['github'] as const] : []),
+  ],
   use: {
     baseURL: env.baseUrl,
     testIdAttribute: 'data-test', // Toolshop marks elements with data-test, not data-testid
@@ -17,23 +28,43 @@ export default defineConfig({
   },
   projects: [
     { name: 'setup', testDir: './tests/setup', testMatch: /.*\.setup\.ts/ },
-    { name: 'api', testDir: './tests/api', use: { baseURL: env.apiUrl } },
+    { name: 'api', testDir: './tests/api', grepInvert: QUARANTINE, use: { baseURL: env.apiUrl } },
     {
       name: 'chromium',
       testDir: './tests/ui',
+      grepInvert: QUARANTINE,
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
     {
       name: 'firefox',
       testDir: './tests/ui',
+      grepInvert: QUARANTINE,
       use: { ...devices['Desktop Firefox'] },
       dependencies: ['setup'],
     },
     {
       name: 'webkit',
       testDir: './tests/ui',
+      grepInvert: QUARANTINE,
       use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
+    },
+    // Quarantine runs with retries: 0 — the point is to observe whether the test has healed, and
+    // retries would hide exactly the instability that put it here.
+    {
+      name: 'quarantine-api',
+      testDir: './tests/api',
+      grep: QUARANTINE,
+      retries: 0,
+      use: { baseURL: env.apiUrl },
+    },
+    {
+      name: 'quarantine-ui',
+      testDir: './tests/ui',
+      grep: QUARANTINE,
+      retries: 0,
+      use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
   ],
