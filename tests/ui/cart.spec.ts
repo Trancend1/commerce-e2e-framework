@@ -17,7 +17,10 @@ test.describe('Cart operations', () => {
     await cartPage.goto();
     await cartPage.setQuantity(0, 3);
 
-    const expectedTotal = (unitPrice * 3).toFixed(2);
-    await expect(cartPage.cartTotal).toContainText(expectedTotal);
+    // Compare numerically, not as a substring: toContainText('19.50') also passes on '119.50'.
+    // expect.poll keeps the retrying behaviour the total needs while the cart refetches.
+    await expect
+      .poll(async () => parseFloat((await cartPage.cartTotal.innerText()).replace(/[^\d.]/g, '')))
+      .toBeCloseTo(unitPrice * 3, 2);
   });
 });
