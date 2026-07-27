@@ -10,6 +10,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    # Budget: lint + smoke run in sequence and must stay under the 10 min PR-gate
+    # budget (docs/TEST-STRATEGY.md). Observed 13-19s, so this is a hang guard.
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,6 +23,8 @@ jobs:
   smoke:
     needs: lint
     runs-on: ubuntu-latest
+    # Observed 90-114s per shard. 7 min keeps the worst case (2 + 7) under budget.
+    timeout-minutes: 7
     strategy:
       fail-fast: false
       matrix:
