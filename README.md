@@ -7,7 +7,7 @@ Layered QA automation framework for an e-commerce application — **Playwright +
 
 📐 **Start here → [Master Blueprint](commerce-e2e-framework.md)** — purpose, scope, strategy, and full documentation map.
 
-📊 **Live test report:** _(published to GitHub Pages after first nightly run)_
+📊 **Live test report → [Allure on GitHub Pages](https://trancend1.github.io/commerce-e2e-framework/)** — rebuilt by every nightly run from the merged UI matrix, API suite, and quarantine results, with a trend chart across runs.
 
 ## System Under Test
 
