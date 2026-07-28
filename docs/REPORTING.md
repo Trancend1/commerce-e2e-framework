@@ -13,6 +13,7 @@
 - Deployed to **GitHub Pages** → <https://trancend1.github.io/commerce-e2e-framework/>, linked from the README
 - Built with `if: always()`, so a red nightly still publishes — that is when the report is worth reading
 - Including quarantine results here is what keeps quarantine honest: a parked test stays visible in the report instead of disappearing from view (see [TEST-STRATEGY.md §5](TEST-STRATEGY.md))
+- The `setup` project is filtered out before generating. It mints `storageState` rather than asserting anything, and it runs once per job — four identical executions share an Allure `historyId`, so they collapse into one entry showing three retries. A retry badge in the report that exists to make instability visible is worse than useless; a genuine setup failure is still loud, since every test in that job fails with it
 - History trend: the `report` job pulls the previous `history/` back off the published site before generating, so trends survive across runs without keeping a `gh-pages` branch. The first run has no history and simply starts the trend. `executor.json` makes each point on the chart link to the run that produced it
 
 ## Generating Allure locally

@@ -133,6 +133,17 @@ jobs:
           path: allure-results
           merge-multiple: true
 
+      # `setup` is a fixture that mints storageState, not a test, and it runs once per job that
+      # needs auth. Four identical executions share a historyId, so Allure folds them into a
+      # single entry with three retries — a retry badge in the very report meant to make
+      # instability visible. A real setup failure still shows up loudly, as every test in that
+      # job failing. Prints the count so a silent no-op cannot pass for a fix.
+      - name: Drop auth-setup results
+        run: |
+          files=$(grep -rlF 'auth.setup.ts' allure-results --include='*-result.json' || true)
+          echo "dropping $(printf '%s' "$files" | grep -c . || true) auth-setup result(s)"
+          [ -n "$files" ] && echo "$files" | xargs rm -- || true
+
       # No `enablement: true` here: creating a Pages site needs admin rights that the default
       # GITHUB_TOKEN does not have, so it fails with "Resource not accessible by integration"
       # rather than self-healing. Pages is enabled once per repo instead — see docs/CI-CD.md.
