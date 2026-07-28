@@ -19,6 +19,8 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run lint
+      # Policy check only — lists tests, never boots the SUT, so it belongs in the cheap job.
+      - run: node scripts/check-quarantine.mjs
 
   smoke:
     needs: lint
@@ -36,9 +38,15 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: bash scripts/sut-up.sh
+      # Each Playwright invocation writes its own json report, then gets checked immediately —
+      # a shared path would let the second run overwrite the first one's evidence.
       - run: npm run test:api
+        env: { PW_JSON_REPORT: test-results/api-report.json }
+      - run: node scripts/check-flake.mjs test-results/api-report.json
       - run: npm run test:contract
       - run: npx playwright test --grep @smoke --project=chromium --shard=${{ matrix.shard }}
+        env: { PW_JSON_REPORT: test-results/ui-report.json }
+      - run: node scripts/check-flake.mjs test-results/ui-report.json
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

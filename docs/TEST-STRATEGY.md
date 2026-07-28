@@ -34,8 +34,15 @@ All automated runs target the **local Dockerized SUT** for isolation and seedabi
 ## 5. Flakiness policy
 
 - CI: `retries: 2`, `trace: on-first-retry`
-- A test that flakes ≥2 times in 7 days → moved to `@quarantine` tag (excluded from gates) + GitHub issue with trace attached
-- Quarantined tests are fixed or deleted within one milestone — never left rotting
+- **Zero flaky tests.** Playwright exits 0 when a test passes on retry, so `scripts/check-flake.mjs` reads the json report and fails the run instead. Enforced in the PR gate and nightly — nightly included deliberately, since cross-browser races only surface there
+- A flaking test is fixed, or quarantined the same day. There is no third option where it stays green and unreliable
+
+### Quarantine
+
+- Tag the test `@quarantine` and annotate it: `{ type: 'quarantine', description: '<reason>, YYYY-MM-DD' }`
+- Exclusion lives in `playwright.config.ts` (`grepInvert`), not in CI commands — a workflow that forgot the flag would leak quarantined tests back into a gate silently
+- Quarantined tests still run nightly via the `quarantine-*` projects with `retries: 0`, non-blocking. Parked must never quietly become deleted, and retries would hide the very instability being observed
+- `scripts/check-quarantine.mjs` fails the gate on a missing annotation, a missing or future date, or anything quarantined longer than `QUARANTINE_MAX_DAYS` (default 14). Extending the date instead of fixing or deleting the test is how a suite rots
 
 ## 6. Defect management
 
@@ -44,7 +51,8 @@ Real defects found in the SUT are documented in [bug-reports/](bug-reports/) usi
 ## 7. Metrics that matter
 
 - PR gate duration (budget: < 10 min)
-- Flake rate (budget: < 2% of runs)
+- Flaky tests (budget: zero). Deliberately binary rather than a percentage: on a suite this size a single flaky test is already 5%, so a rate would measure suite size more than reliability. Revisit when the suite is large enough for a rate to carry signal
+- Quarantine size and age (budget: nothing older than 14 days)
 - Defect detection: every Critical journey covered at ≥2 layers
 
 ## 8. Decision log

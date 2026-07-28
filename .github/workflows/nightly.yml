@@ -24,11 +24,32 @@ jobs:
       - run: npx playwright install --with-deps chromium ${{ matrix.browser }}
       - run: bash scripts/sut-up.sh
       - run: npx playwright test tests/ui --project=${{ matrix.browser }}
+        env: { PW_JSON_REPORT: test-results/ui-report.json }
+      # Nightly is where cross-browser races surface, so the zero-flaky budget is enforced here
+      # too. A test that cannot be fixed right now goes to quarantine, not back into hiding.
+      - run: node scripts/check-flake.mjs test-results/ui-report.json
+        if: always()
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: results-${{ matrix.browser }}
           path: test-results/
+
+  # Quarantined tests still run, so "parked" never quietly becomes "deleted". Non-blocking by
+  # design: these are known-unreliable, and the signal wanted here is whether they have healed.
+  quarantine:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: bash scripts/sut-up.sh
+      # --pass-with-no-tests: an empty quarantine is the healthy steady state, not a failure.
+      - run: npx playwright test --project=quarantine-api --project=quarantine-ui --pass-with-no-tests
 
   perf:
     runs-on: ubuntu-latest
