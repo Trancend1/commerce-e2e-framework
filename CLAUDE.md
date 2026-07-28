@@ -86,7 +86,7 @@ Universal checklist — must pass before any milestone is considered exited:
 
 **Active phase:** M3 — Quality gates
 
-**Sprint focus:** M2 closed 2026-07-28 (§2.5). M3 gates: the PR gate is sharded 2× with the < 10 min budget now enforced by job timeouts, and the nightly 3-browser matrix genuinely runs all three engines. Remaining: Allure on GitHub Pages and the quarantine mechanism.
+**Sprint focus:** M2 closed 2026-07-28 (§2.5). Three of four M3 gates are in: the PR gate is sharded 2× with the < 10 min budget enforced by job timeouts, the nightly 3-browser matrix genuinely runs all three engines, and quarantine + the zero-flaky check landed in [#3](https://github.com/Trancend1/commerce-e2e-framework/pull/3). Remaining: Allure on GitHub Pages.
 
 **Orchestrator:** Farhan
 
@@ -99,8 +99,8 @@ M3 exits only when:
 - [x] PR gate sharded (2×) with the < 10 min budget enforced, not merely observed (run 30287558238)
 - [x] `nightly.yml` runs all three browsers green, verified at shard level rather than by job conclusion (run 30286717667)
 - [ ] Allure report builds from merged shard results, deploys to GitHub Pages, linked from README
-- [ ] Quarantine mechanism: `@quarantine` excluded from gates, quarantined tests still visible in reporting
-- [ ] Flake rate observable — `retries: 2` currently reports a flaky pass as green, so the < 2% budget in `docs/TEST-STRATEGY.md` has no measurement behind it
+- [x] Quarantine mechanism: `@quarantine` excluded via `grepInvert` in `playwright.config.ts` (config, so no CI command can forget it), still executed by the nightly `quarantine` job, expiry enforced by `scripts/check-quarantine.mjs`. Exclusion proven by nightly `tests/ui` counting 8 tests instead of 9 with a probe present (run 30298837346), gates clean once the probe was deleted (run 30391082024)
+- [x] Flake observable — `scripts/check-flake.mjs` reads the json report and fails on any `flaky` status in both gates, since Playwright itself exits 0 on a retry pass. The `< 2%` budget was replaced with a binary zero, because on a suite this size one flaky test is already 5%
 
 ### 2.5 Phase Log
 

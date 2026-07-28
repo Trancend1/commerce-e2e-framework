@@ -23,7 +23,7 @@
 - [x] PR gate sharded (2×), budget < 10 min enforced ([run 30287558238](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30287558238))
 - [x] `nightly.yml` 3-browser matrix ([run 30286717667](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30286717667))
 - [ ] Allure build + GitHub Pages deploy + README badge/link
-- [ ] Quarantine mechanism (`@quarantine` tag excluded from gates)
+- [x] Quarantine mechanism (`@quarantine` excluded in config, not per CI command) + zero-flaky gate ([run 30391082024](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30391082024))
 
 ## M4 — Beyond functional
 
