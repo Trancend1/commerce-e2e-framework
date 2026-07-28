@@ -133,10 +133,11 @@ jobs:
           path: allure-results
           merge-multiple: true
 
+      # No `enablement: true` here: creating a Pages site needs admin rights that the default
+      # GITHUB_TOKEN does not have, so it fails with "Resource not accessible by integration"
+      # rather than self-healing. Pages is enabled once per repo instead — see docs/CI-CD.md.
       - uses: actions/configure-pages@v5
         id: pages
-        with:
-          enablement: true
 
       # Trend charts need the previous report's history folder. It lives on the already-published
       # site, so pull it back from there; the first ever run 404s and simply starts a fresh trend.

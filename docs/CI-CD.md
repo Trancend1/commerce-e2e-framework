@@ -33,6 +33,16 @@ k6 load (thresholds: p95 budgets — fail = red run)   build Allure ──► de
 
 The report job runs `if: always()` and does not gate on the suites passing — a red nightly is exactly when someone needs to read it. `perf` is deliberately outside the report path: k6 does not emit Allure results.
 
+### One-time repo setup for the published report
+
+Pages must be enabled once, with **Actions** as the source, before the `report` job can deploy:
+
+```bash
+gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow
+```
+
+The workflow deliberately does not do this itself. `actions/configure-pages` can create the site, but only with a token holding admin rights — the default `GITHUB_TOKEN` does not, so it fails with `Resource not accessible by integration` instead of self-healing. Enabling Pages also creates the `github-pages` environment, which by default only allows deployments from `main`; a branch that needs to prove the deploy before merge must be added to its deployment-branch policy temporarily.
+
 ## Conventions
 
 - `npm ci` + `npx playwright install --with-deps` with browser cache
