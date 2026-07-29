@@ -86,7 +86,7 @@ Universal checklist — must pass before any milestone is considered exited:
 
 **Active phase:** M4 — Beyond functional
 
-**Sprint focus:** M3 closed 2026-07-29 (§2.5) — all four gates in, the last being the merged Allure report on GitHub Pages ([#4](https://github.com/Trancend1/commerce-e2e-framework/pull/4)). M4 starts partially done: the nightly `perf` job already runs `k6 run tests/performance/login.smoke.js`, but with no p95 thresholds and no load profile, and nothing on PRs. Next up: real k6 thresholds, then axe-core, then visual regression.
+**Sprint focus:** M3 closed 2026-07-29 (§2.5) — all four gates in, the last being the merged Allure report on GitHub Pages ([#4](https://github.com/Trancend1/commerce-e2e-framework/pull/4)). M4 starts partially done: the nightly `perf` job runs `k6 run tests/performance/login.smoke.js`, which already carries thresholds (`http_req_failed: rate==0`, `http_req_duration: p(95)<800`) and fails the job when they break, since k6 exits non-zero on a threshold breach. What is missing is coverage and shape — login only, smoke only, nightly only. Next up: k6 on search and checkout plus the load profiles the workflow's own `TODO(M4)` promises and smoke on PRs, then axe-core, then visual regression.
 
 **Orchestrator:** Farhan
 
@@ -104,7 +104,7 @@ M3 exited when:
 
 **M4 (active) — provisional, pending orchestrator confirmation.** Mirrors the M4 items in `docs/ROADMAP.md`; the threshold numbers are not decided yet:
 
-- [ ] k6 login/search/checkout with p95 thresholds that actually fail the job — smoke on PR, load nightly. Today's `perf` job runs a login smoke with no threshold, so it cannot fail on a regression
+- [ ] k6 covers search and checkout, not only login; load profiles (`*.load.js`) exist and run nightly; smoke runs on PRs. Thresholds themselves are already in place and already fail the job — `login.smoke.js` sets `http_req_failed: rate==0` and `p(95)<800`, so what is open here is scope, not enforcement. p95 budgets for search and checkout are undecided
 - [ ] axe-core scan on key pages, with the violation budget stated rather than "no serious violations" by accident
 - [ ] Visual regression on catalog + checkout, with a documented answer for how snapshots are updated and reviewed
 
