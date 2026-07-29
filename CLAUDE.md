@@ -92,9 +92,9 @@ Universal checklist — must pass before any milestone is considered exited:
 
 **Next:** After M5 exits, the framework is portfolio-complete; remaining ideas live in the Icebox.
 
-### 2.4 Exit Criteria — M3 (closed 2026-07-29)
+### 2.4 Exit Criteria
 
-M3 exited when:
+Newest milestone last. **M3 (closed 2026-07-29)** exited when:
 
 - [x] PR gate sharded (2×) with the < 10 min budget enforced, not merely observed (run 30287558238)
 - [x] `nightly.yml` runs all three browsers green, verified at shard level rather than by job conclusion (run 30286717667)
@@ -108,7 +108,16 @@ M3 exited when:
 - [x] axe-core scan on login, catalog, product detail and checkout: zero `serious` or `critical`, `moderate`/`minor` reported but non-blocking (ADR-003). Landed in [#11](https://github.com/Trancend1/commerce-e2e-framework/pull/11), green on run 30467771299 with the `a11y` suite merged into the published report. The red first run behaved as the ADR predicted and produced BUG-002 (`button-name`, login) and BUG-003 (`list`, catalog), both waived by rule after being written up. Runs nightly, not on the PR gate — promoting it is the open follow-up now that the budget holds
 - [x] Visual regression on the catalog list and checkout step 1, chromium, nightly only, `maxDiffPixelRatio: 0.01`, baselines generated in CI and updated through a PR (ADR-004). Landed in [#12](https://github.com/Trancend1/commerce-e2e-framework/pull/12) and [#13](https://github.com/Trancend1/commerce-e2e-framework/pull/13), green on run 30480555355 with the `visual` suite in the published report. **Deviation from ADR-004:** the `Visual Baselines` workflow uploads an artifact instead of committing and opening the PR itself, because §4.6 forbids bot-authored commits; a human commits and opens it, so baseline changes are still a reviewed diff. If the bot-commit route is wanted instead, that needs ADR-005 — ADRs are superseded, not edited
 
-Execution order is k6 → axe → visual, one PR each.
+Execution order was k6 → axe → visual, one PR each.
+
+**M5 (active) — mirrors `docs/ROADMAP.md`; the one judgement call is flagged below.**
+
+- [x] Three to five real defects documented in [bug-reports/](docs/bug-reports/) — target met at three: BUG-001 (checkout click swallowed during the postcode lookup, found via the M2 flake), BUG-002 (`button-name`, login password toggle) and BUG-003 (`list`, catalog filters), the last two from the first a11y scan. More may arrive on their own; none will be manufactured to pad the count
+- [ ] ADR set complete — four exist (001 Playwright over Cypress, 002 API seeding, 003 a11y budget, 004 visual baselines). **"Complete" needs a definition before this can be ticked honestly.** The open candidate is ADR-005 on whether the baseline workflow may commit as a bot, which §4.6 currently forbids
+- [ ] README case-study section: what this framework caught and what it cost. The material exists — three defects, the nightly matrix that was green while only chromium ran, the retry that hid a real race, a threshold that could not break — but none of it is written up
+- [ ] Repo topics and description set; fresh-clone quick start verified on a clean machine. Untouched, and the only item here that cannot be proven from CI — it needs a machine that has never built this repo
+
+The five M4 carry-forwards in §2.5 are deliberately **not** M5 exit criteria. They are real and they stay open, but folding them in would widen M5 past what was agreed.
 
 ### 2.5 Phase Log
 
