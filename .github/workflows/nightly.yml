@@ -68,6 +68,30 @@ jobs:
           name: allure-results-api
           path: allure-results/
 
+  # Nightly rather than the PR gate, deliberately. Toolshop's accessibility state is inherited, so
+  # the first scans may well be red; blocking every pull request on a third-party application's
+  # markup would stop the project rather than improve it. Promote to the PR gate once the findings
+  # are documented and the budget holds — see ADR-003.
+  a11y:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: bash scripts/sut-up.sh
+      - run: npx playwright test --project=a11y
+        env: { PW_JSON_REPORT: test-results/a11y-report.json }
+      - run: node scripts/check-flake.mjs test-results/a11y-report.json
+        if: always()
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: allure-results-a11y
+          path: allure-results/
+
   # Quarantined tests still run, so "parked" never quietly becomes "deleted". Non-blocking by
   # design: these are known-unreliable, and the signal wanted here is whether they have healed.
   quarantine:
@@ -117,7 +141,7 @@ jobs:
   # Merge every suite's results into one Allure report and publish it. `if: always()` because a
   # red nightly is precisely when the report is worth reading.
   report:
-    needs: [full-e2e, full-api, quarantine]
+    needs: [full-e2e, full-api, a11y, quarantine]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10

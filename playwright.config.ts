@@ -68,6 +68,15 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
       dependencies: ['setup'],
     },
+    // Accessibility scans a page's rendered state, which does not vary by engine in ways axe
+    // reports on, so one browser is enough — see ADR-003.
+    {
+      name: 'a11y',
+      testDir: './tests/a11y',
+      grepInvert: QUARANTINE,
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
     // Quarantine runs with retries: 0 — the point is to observe whether the test has healed, and
     // retries would hide exactly the instability that put it here.
     {
