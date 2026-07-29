@@ -27,7 +27,7 @@
 
 ## M4 — Beyond functional
 
-- [ ] k6: login/search/checkout — smoke on PR, load nightly, p95 thresholds
+- [x] k6: login/search/checkout — smoke on PR, load nightly, p95 thresholds ([run 30459015349](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30459015349))
 - [ ] Accessibility scan (axe-core) on key pages
 - [ ] Visual regression on catalog + checkout (Playwright snapshots)
 
