@@ -1,4 +1,4 @@
-import { test } from '../../fixtures/pages.fixture';
+import { test, expect } from '../../fixtures/pages.fixture';
 import { CUSTOMER_STORAGE_STATE } from '../../fixtures/auth.fixture';
 import { buildAddress } from '../../utils/dataFactory';
 import { expectNoBlockingViolations } from '../../utils/a11y';
@@ -49,6 +49,11 @@ test.describe('Accessibility — checkout', () => {
     await catalogPage.goto();
     await catalogPage.openFirstProduct();
     await productPage.addToCart();
+    // The badge is the signal that the cart request landed. Navigating straight to the cart races
+    // it, and an empty cart never renders the proceed button — which is how this first appeared,
+    // as a 30s timeout on `proceed-1` rather than as anything to do with accessibility.
+    await expect(productPage.cartQuantityBadge).toHaveText('1');
+
     await cartPage.goto();
     await cartPage.proceedToSignIn();
     await checkoutPage.proceedFromSignIn();
