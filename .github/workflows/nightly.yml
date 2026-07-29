@@ -15,6 +15,11 @@ concurrency:
 jobs:
   full-e2e:
     runs-on: ubuntu-latest
+    # The only nightly job that had no ceiling, which stopped being theoretical on run
+    # 30478659456: `playwright install` stalled on the firefox shard and the job sat there while
+    # every other job had finished. Without this it can hold the runner for GitHub's 6 hour
+    # default and block the report job behind it. Observed 90-120s per browser.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
