@@ -26,7 +26,12 @@ export default [
   {
     // k6 scripts run inside the k6 runtime, not Node
     files: ['tests/performance/**/*.js'],
-    languageOptions: { sourceType: 'module', globals: { __ENV: 'readonly' } },
+    // k6 runtime globals: env vars, plus the VU and iteration counters used to keep payloads
+    // distinct across virtual users.
+    languageOptions: {
+      sourceType: 'module',
+      globals: { __ENV: 'readonly', __VU: 'readonly', __ITER: 'readonly' },
+    },
   },
   {
     // CI helper scripts run under Node

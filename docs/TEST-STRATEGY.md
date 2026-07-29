@@ -22,16 +22,16 @@ Why not test everything through the UI? UI tests are the slowest and most fragil
 
 ## 3. Quality gates
 
-| Gate    | When          | Content                                                  | Blocking?                    |
-| ------- | ------------- | -------------------------------------------------------- | ---------------------------- |
-| PR gate | every push/PR | lint → Newman contract → `@smoke` UI (Chromium, sharded) | **Yes** — required check     |
-| Nightly | cron          | full UI (3 browsers) + full API + k6                     | No, but failures open issues |
+| Gate    | When          | Content                                                                        | Blocking?                    |
+| ------- | ------------- | ------------------------------------------------------------------------------ | ---------------------------- |
+| PR gate | every push/PR | lint → Newman contract → `@smoke` UI (Chromium, sharded); k6 smoke in parallel | **Yes** — required check     |
+| Nightly | cron          | full UI (3 browsers) + full API + k6 load                                      | No, but failures open issues |
 
 ## 3a. Performance budgets
 
 k6 exits non-zero when a threshold breaks, so these budgets fail the job rather than merely being printed.
 
-**State today:** only the login smoke exists, and it runs nightly. Search, checkout, the load profiles and the PR-gate smoke land with the M4 k6 track — the table below is the target that track is measured against, and the gate table above describes what actually runs.
+Budgets are scoped to a `journey` tag rather than to `http_req_duration` as a whole, because the checkout scenario has to mint a token before it can post an invoice and that login call would otherwise drag checkout's p95 toward login's much faster numbers — the budget would pass for the wrong reason. `http_req_failed: rate==0` stays global.
 
 | Journey  | Budget           | Profile                   |
 | -------- | ---------------- | ------------------------- |

@@ -93,12 +93,19 @@ jobs:
 
   perf:
     runs-on: ubuntu-latest
+    # Two 3.5 min load profiles plus a smoke and the SUT boot — about 9 min. A hang guard, since
+    # nightly has no gate budget of its own.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: grafana/setup-k6-action@v1
       - run: bash scripts/sut-up.sh
-      - run: k6 run tests/performance/login.smoke.js
-      # TODO(M4): swap smoke for load profiles with p95 thresholds
+      # Load profiles for the read paths; checkout stays a smoke because a load profile there
+      # writes hundreds of orders into the database whose latency is being measured
+      # (docs/TEST-STRATEGY.md §3a).
+      - run: k6 run tests/performance/login.load.js
+      - run: k6 run tests/performance/search.load.js
+      - run: k6 run tests/performance/checkout.smoke.js
 
   # Merge every suite's results into one Allure report and publish it. `if: always()` because a
   # red nightly is precisely when the report is worth reading.
