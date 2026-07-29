@@ -1,0 +1,40 @@
+# Regenerates visual baselines and hands them back as an artifact — see ADR-004 and docs/CI-CD.md.
+#
+# Baselines are platform-specific, so they can only be produced on the runner. This workflow does
+# not commit them: CLAUDE.md §4.6 forbids pushing commits under a bot identity, so the artifact is
+# downloaded and committed by a human, who then opens the pull request. The property ADR-004
+# actually cares about is preserved — baseline changes arrive as a reviewable diff, never as a
+# silent overwrite.
+name: Visual Baselines
+
+on:
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: bash scripts/sut-up.sh
+
+      # Playwright reports a written-or-changed baseline as a failed test, which is correct for a
+      # normal run and useless here — regenerating is the entire point of this workflow.
+      - run: npx playwright test --project=visual --update-snapshots
+        continue-on-error: true
+
+      # Guards against uploading an empty artifact when the run died before writing anything.
+      - name: Verify baselines were produced
+        run: |
+          count=$(find tests/visual -name '*.png' | wc -l)
+          echo "baseline images on disk: $count"
+          [ "$count" -gt 0 ]
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: visual-baselines
+          path: tests/visual/**/*.png
