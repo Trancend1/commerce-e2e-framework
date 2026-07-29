@@ -1,10 +1,10 @@
-// k6 smoke: 1 VU sanity on the login endpoint. Load profile lives in login.load.js (nightly).
-// Run: k6 run tests/performance/login.smoke.js  (requires local SUT — docs/ENVIRONMENT.md)
+// k6 load: ramping VUs against the login endpoint. Nightly only — see docs/TEST-STRATEGY.md §3a.
+// Run: k6 run tests/performance/login.load.js  (requires local SUT — docs/ENVIRONMENT.md)
 import http from 'k6/http';
 import { check } from 'k6';
-import { API, CUSTOMER, JSON_HEADERS, smokeOptions } from './options.js';
+import { API, CUSTOMER, JSON_HEADERS, loadOptions } from './options.js';
 
-export const options = smokeOptions('login');
+export const options = loadOptions('login');
 
 export default function () {
   const res = http.post(`${API}/users/login`, JSON.stringify(CUSTOMER), {

@@ -53,3 +53,20 @@ jobs:
           name: traces-${{ strategy.job-index }}
           path: test-results/
           retention-days: 14
+
+  # Runs beside the smoke shards rather than after them: it needs its own SUT and would otherwise
+  # push the gate's critical path past the 10 min budget. 1 VU each, so the cost is the SUT boot.
+  # Load profiles stay nightly — see docs/TEST-STRATEGY.md §3a.
+  perf-smoke:
+    needs: lint
+    runs-on: ubuntu-latest
+    # Observed ~60s, nearly all of it SUT boot. 5 min is a hang guard, not a budget.
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: grafana/setup-k6-action@v1
+      - run: bash scripts/sut-up.sh
+      # k6 exits non-zero when a threshold breaks, so each of these is a gate, not a report.
+      - run: k6 run tests/performance/login.smoke.js
+      - run: k6 run tests/performance/search.smoke.js
+      - run: k6 run tests/performance/checkout.smoke.js
