@@ -16,8 +16,19 @@ const BLOCKING_IMPACTS: ReadonlySet<string> = new Set(['serious', 'critical']);
  *
  * A waiver is a decision on the record, not a way to make the gate quiet: ADR-003 requires the
  * violation to be written up in docs/bug-reports/ before it lands here. Empty is the healthy state.
+ *
+ * Waivers are keyed by rule, not by page, so the same rule breaking on a page added to the scan
+ * later would also pass. The attachment is the backstop — every violation, waived or not, is still
+ * written into the report, so a waived rule spreading is visible to anyone who opens it.
  */
-export const WAIVED_RULES: Readonly<Record<string, string>> = Object.freeze({});
+export const WAIVED_RULES: Readonly<Record<string, string>> = Object.freeze({
+  'button-name':
+    'BUG-002 — login password reveal toggle has no accessible name. Upstream markup in a ' +
+    'third-party practice app, not ours to fix. Waived 2026-07-29.',
+  list:
+    'BUG-003 — catalog filter groups put <fieldset> directly inside <ul>. Upstream markup, one ' +
+    'repeated component. Waived 2026-07-29.',
+});
 
 function describe(violation: Result): string {
   const nodes = violation.nodes.length;
