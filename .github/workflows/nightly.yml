@@ -137,12 +137,10 @@ jobs:
       # needs auth. Four identical executions share a historyId, so Allure folds them into a
       # single entry with three retries — a retry badge in the very report meant to make
       # instability visible. A real setup failure still shows up loudly, as every test in that
-      # job failing. Prints the count so a silent no-op cannot pass for a fix.
+      # job failing. The script selects by Playwright project label rather than by file path, and
+      # fails if it matches nothing, so a silent no-op cannot pass for a fix.
       - name: Drop auth-setup results
-        run: |
-          files=$(grep -rlF 'auth.setup.ts' allure-results --include='*-result.json' || true)
-          echo "dropping $(printf '%s' "$files" | grep -c . || true) auth-setup result(s)"
-          [ -n "$files" ] && echo "$files" | xargs rm -- || true
+        run: node scripts/drop-auth-setup-results.mjs allure-results
 
       # No `enablement: true` here: creating a Pages site needs admin rights that the default
       # GITHUB_TOKEN does not have, so it fails with "Resource not accessible by integration"
@@ -165,16 +163,26 @@ jobs:
           done
 
       # Makes each point on the trend chart link back to the run that produced it.
+      #
+      # `reportUrl` deliberately holds the Actions run URL rather than the Pages base. Allure
+      # copies only `reportUrl` into history-trend.json — `buildUrl` never survives into history —
+      # so pointing it at the site would make every trend point link to whatever report happens to
+      # be published now, which for an old point is a different run's results. Only one report is
+      # published at a time (see docs/REPORTING.md), so there is no per-run report to link to; the
+      # run page, with its per-suite result artifacts, is the honest destination. Allure also
+      # builds per-test history links as `reportUrl` + `#testresult/<uid>`, which degrades to the
+      # same run page since the fragment is ignored there.
       - name: Write Allure executor metadata
         run: |
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           cat > allure-results/executor.json <<EOF
           {
             "name": "GitHub Actions",
             "type": "github",
             "buildOrder": ${{ github.run_number }},
             "buildName": "nightly #${{ github.run_number }}",
-            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-            "reportUrl": "${{ steps.pages.outputs.base_url }}"
+            "buildUrl": "$run_url",
+            "reportUrl": "$run_url"
           }
           EOF
 
