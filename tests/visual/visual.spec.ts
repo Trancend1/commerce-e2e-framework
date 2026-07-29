@@ -35,8 +35,12 @@ test.describe('Visual regression — checkout', () => {
     await cartPage.proceedToSignIn();
     await checkoutPage.proceedFromSignIn();
 
-    // Captured before `fillBillingAddress`, deliberately. The address comes from faker, so a
-    // screenshot taken after filling would diff against its own baseline every single night.
+    // Captured before `fillBillingAddress`, deliberately: that helper fills from faker, so a
+    // screenshot taken after it would diff against its own baseline every single night.
+    //
+    // The form is not blank here — street and city arrive prefilled from the seeded customer
+    // profile. That is stable data from the pinned container image and belongs in the baseline;
+    // only the faker values have to stay out.
     await expect(checkoutPage.streetInput).toBeVisible();
 
     await expect(page).toHaveScreenshot('checkout-billing-step.png', { fullPage: true });
