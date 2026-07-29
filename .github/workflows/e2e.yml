@@ -14,8 +14,8 @@ jobs:
     # budget (docs/TEST-STRATEGY.md). Observed 13-19s, so this is a hang guard.
     timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run lint
@@ -32,8 +32,8 @@ jobs:
       matrix:
         shard: [1/2, 2/2]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -47,7 +47,7 @@ jobs:
       - run: npx playwright test --grep @smoke --project=chromium --shard=${{ matrix.shard }}
         env: { PW_JSON_REPORT: test-results/ui-report.json }
       - run: node scripts/check-flake.mjs test-results/ui-report.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: traces-${{ strategy.job-index }}
