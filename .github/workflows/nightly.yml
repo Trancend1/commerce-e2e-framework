@@ -99,6 +99,36 @@ jobs:
           name: allure-results-a11y
           path: allure-results/
 
+  # Chromium only and nightly only, per ADR-004. A rendering difference should open an
+  # investigation, not block an unrelated pull request. Baselines come from the Visual Baselines
+  # workflow — this job only compares against what is committed.
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: bash scripts/sut-up.sh
+      - run: npx playwright test --project=visual
+        env: { PW_JSON_REPORT: test-results/visual-report.json }
+      - run: node scripts/check-flake.mjs test-results/visual-report.json
+        if: always()
+      # Carries the diff images, which are the only way to judge whether a failure is a real
+      # regression or noise that wants a tolerance conversation.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: results-visual
+          path: test-results/
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: allure-results-visual
+          path: allure-results/
+
   # Quarantined tests still run, so "parked" never quietly becomes "deleted". Non-blocking by
   # design: these are known-unreliable, and the signal wanted here is whether they have healed.
   quarantine:
@@ -148,7 +178,7 @@ jobs:
   # Merge every suite's results into one Allure report and publish it. `if: always()` because a
   # red nightly is precisely when the report is worth reading.
   report:
-    needs: [full-e2e, full-api, a11y, quarantine]
+    needs: [full-e2e, full-api, a11y, visual, quarantine]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10

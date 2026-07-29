@@ -37,6 +37,12 @@ export default defineConfig({
       : []),
     ...(process.env.CI ? [['github'] as const] : []),
   ],
+  // Tolerance for visual comparison, per ADR-004. It absorbs anti-aliasing noise between runs on
+  // the same platform — and, honestly, small real regressions too; the number is a starting point
+  // to revisit if either failure mode shows up.
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
+  },
   use: {
     baseURL: env.baseUrl,
     testIdAttribute: 'data-test', // Toolshop marks elements with data-test, not data-testid
@@ -66,6 +72,15 @@ export default defineConfig({
       testDir: './tests/ui',
       grepInvert: QUARANTINE,
       use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
+    },
+    // Visual baselines are platform-specific — see ADR-004. Chromium only, and generated in CI,
+    // because a screenshot taken on Windows never matches one taken on the Linux runner.
+    {
+      name: 'visual',
+      testDir: './tests/visual',
+      grepInvert: QUARANTINE,
+      use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
     // Accessibility scans a page's rendered state, which does not vary by engine in ways axe
