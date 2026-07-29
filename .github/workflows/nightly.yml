@@ -111,6 +111,9 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      # Reading the previous run's published-site artifact. Without this the token has no Actions
+      # scope at all, since naming any permission drops the rest to none.
+      actions: read
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -162,33 +165,64 @@ jobs:
             fi
           done
 
-      # Makes each point on the trend chart link back to the run that produced it.
-      #
-      # `reportUrl` deliberately holds the Actions run URL rather than the Pages base. Allure
-      # copies only `reportUrl` into history-trend.json — `buildUrl` never survives into history —
-      # so pointing it at the site would make every trend point link to whatever report happens to
-      # be published now, which for an old point is a different run's results. Only one report is
-      # published at a time (see docs/REPORTING.md), so there is no per-run report to link to; the
-      # run page, with its per-suite result artifacts, is the honest destination. Allure also
-      # builds per-test history links as `reportUrl` + `#testresult/<uid>`, which degrades to the
-      # same run page since the fragment is ignored there.
+      # Makes each point on the trend chart link back to the report that produced it. Allure copies
+      # only `reportUrl` into history-trend.json — `buildUrl` never survives into history — so this
+      # has to name the run's own report directory, not the site root, or an old point would open
+      # whichever report happens to be published now. `buildUrl` still reaches the run itself from
+      # the Executors widget.
       - name: Write Allure executor metadata
         run: |
-          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           cat > allure-results/executor.json <<EOF
           {
             "name": "GitHub Actions",
             "type": "github",
             "buildOrder": ${{ github.run_number }},
             "buildName": "nightly #${{ github.run_number }}",
-            "buildUrl": "$run_url",
-            "reportUrl": "$run_url"
+            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "reportUrl": "${{ steps.pages.outputs.base_url }}/runs/${{ github.run_number }}"
           }
           EOF
 
       - run: npx allure generate allure-results --clean -o allure-report
+
+      # A Pages deploy replaces the entire site, so the previous one has to be carried forward or
+      # every historical report disappears the moment the next nightly publishes. It travels as a
+      # workflow artifact rather than a gh-pages branch, keeping the nightly out of the repo's
+      # commit history. A missing artifact is not fatal: retention expires, and the very first run
+      # has nothing to restore — the site simply starts over with this run's report.
+      - name: Restore the previously published site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(gh run list --workflow=nightly.yml --branch=main --status=success \
+            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -z "$previous" ]; then
+            echo "no earlier successful nightly — starting a fresh site"
+          elif gh run download "$previous" --name published-site --dir site; then
+            echo "restored the site published by run $previous"
+          else
+            echo "run $previous published no site artifact — starting a fresh site"
+          fi
+
+      # --keep bounds the site: past that, the oldest reports fall off and their trend points go
+      # stale. Twenty nights is roughly three weeks of history, which is longer than any flake
+      # investigation here has needed.
+      - name: Assemble the site
+        run: |
+          node scripts/assemble-report-site.mjs \
+            --report allure-report \
+            --site site \
+            --run ${{ github.run_number }} \
+            --keep 20
+
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: allure-report
+          path: site
+      # Feeds the next nightly's restore step. Without it the chain breaks and the site resets to
+      # a single report.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: published-site
+          path: site
       - uses: actions/deploy-pages@v5
         id: deploy
