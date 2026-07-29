@@ -28,7 +28,7 @@
 ## M4 — Beyond functional
 
 - [x] k6: login/search/checkout — smoke on PR, load nightly, p95 thresholds ([run 30459015349](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30459015349))
-- [ ] Accessibility scan (axe-core) on key pages
+- [x] Accessibility scan (axe-core) on key pages ([run 30467771299](https://github.com/Trancend1/commerce-e2e-framework/actions/runs/30467771299)) — found [BUG-002](bug-reports/BUG-002-login-password-reveal-button-has-no-accessible-name.md) and [BUG-003](bug-reports/BUG-003-catalog-filter-lists-contain-fieldsets.md)
 - [ ] Visual regression on catalog + checkout (Playwright snapshots)
 
 ## M5 — Polish (portfolio-ready)
