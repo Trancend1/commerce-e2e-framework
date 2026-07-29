@@ -84,23 +84,29 @@ Universal checklist — must pass before any milestone is considered exited:
 
 ### 2.3 Active Phase
 
-**Active phase:** M3 — Quality gates
+**Active phase:** M4 — Beyond functional
 
-**Sprint focus:** M2 closed 2026-07-28 (§2.5). Three of four M3 gates are in: the PR gate is sharded 2× with the < 10 min budget enforced by job timeouts, the nightly 3-browser matrix genuinely runs all three engines, and quarantine + the zero-flaky check landed in [#3](https://github.com/Trancend1/commerce-e2e-framework/pull/3). Remaining: Allure on GitHub Pages.
+**Sprint focus:** M3 closed 2026-07-29 (§2.5) — all four gates in, the last being the merged Allure report on GitHub Pages ([#4](https://github.com/Trancend1/commerce-e2e-framework/pull/4)). M4 starts partially done: the nightly `perf` job already runs `k6 run tests/performance/login.smoke.js`, but with no p95 thresholds and no load profile, and nothing on PRs. Next up: real k6 thresholds, then axe-core, then visual regression.
 
 **Orchestrator:** Farhan
 
-**Next:** After M3 exits, start M4 (k6 thresholds, axe-core a11y, visual regression).
+**Next:** After M4 exits, start M5 (defect reports, ADR set, README case study).
 
-### 2.4 Exit Criteria
+### 2.4 Exit Criteria — M3 (closed 2026-07-29)
 
-M3 exits only when:
+M3 exited when:
 
 - [x] PR gate sharded (2×) with the < 10 min budget enforced, not merely observed (run 30287558238)
 - [x] `nightly.yml` runs all three browsers green, verified at shard level rather than by job conclusion (run 30286717667)
-- [ ] Allure report builds from merged shard results, deploys to GitHub Pages, linked from README
+- [x] Allure report builds from merged shard results, deploys to GitHub Pages, linked from README. Merge proven by `widgets/suites.json` on the published site listing four suites (`api` 14, `chromium` 7, `firefox` 7, `webkit` 7 = 35), not one shard's worth; trend retention proven by `widgets/history-trend.json` carrying four builds after a second consecutive publish (runs 30435539302 → 30436058761)
 - [x] Quarantine mechanism: `@quarantine` excluded via `grepInvert` in `playwright.config.ts` (config, so no CI command can forget it), still executed by the nightly `quarantine` job, expiry enforced by `scripts/check-quarantine.mjs`. Exclusion proven by nightly `tests/ui` counting 8 tests instead of 9 with a probe present (run 30298837346), gates clean once the probe was deleted (run 30391082024)
 - [x] Flake observable — `scripts/check-flake.mjs` reads the json report and fails on any `flaky` status in both gates, since Playwright itself exits 0 on a retry pass. The `< 2%` budget was replaced with a binary zero, because on a suite this size one flaky test is already 5%
+
+**M4 (active) — provisional, pending orchestrator confirmation.** Mirrors the M4 items in `docs/ROADMAP.md`; the threshold numbers are not decided yet:
+
+- [ ] k6 login/search/checkout with p95 thresholds that actually fail the job — smoke on PR, load nightly. Today's `perf` job runs a login smoke with no threshold, so it cannot fail on a regression
+- [ ] axe-core scan on key pages, with the violation budget stated rather than "no serious violations" by accident
+- [ ] Visual regression on catalog + checkout, with a documented answer for how snapshots are updated and reviewed
 
 ### 2.5 Phase Log
 
@@ -108,7 +114,7 @@ M3 exits only when:
 | ----- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | M1    | Complete (2026-07-19) | Skeleton scaffolded before git init — verify repo hygiene first. Upstream prebuilt images can be single-arch (web was arm64-only) — always verify architecture before pinning                                                                                                 | Playwright `testIdAttribute` must stay `data-test` (Toolshop convention); `test:contract` script dangling until M2 delivers the Newman collection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | M2    | Complete (2026-07-28) | A green pipeline is not evidence the suite ran. The nightly matrix was red for 5 straight nights with only chromium ever executing, and `retries: 2` reported a real race as a green pass — both invisible unless you read shard-level test counts instead of job conclusions | Six critic findings, all closed during M3 — `cart.spec.ts` substring total in 7d82881 (mutation-checked: run 30293504240 fails on a mutated expectation), the rest in [#2](https://github.com/Trancend1/commerce-e2e-framework/pull/2): `ApiClient.get()` dead code removed, `login.spec.ts` moved onto the fixture, `catalog.spec.ts` decoupled from seeded product naming, `categories` unknown-id case added. **Still open:** the ADR-002 seeding entry point remains unbuilt — deliberately, since no test needs it yet. Also learned: categories has no `GET /categories/{id}` (documented PUT/DELETE only), so it is not symmetric with brands/products |
-| M3    | Active                | —                                                                                                                                                                                                                                                                             | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| M3    | Complete (2026-07-29) | A published report is not automatically an honest one. The `setup` fixture runs once per job, and four executions sharing a historyId got folded by Allure into one entry with three retries — a retry badge sitting in the very report built to make instability visible, fixed by dropping auth-setup results before `allure generate`. Second lesson: verify a deploy by its deployment record and a live fetch, not by `GET /repos/../pages` `status`, which stays `null` for `build_type: workflow` and reads like a failure                                                                                                                                | Four critic findings, all open: (1) the `Write Allure executor metadata` comment claims each trend point links back to its run, but published `history-trend.json` entries carry only the static `reportUrl` and per-test `history.json` items deep-link into the *current* report — `buildUrl` is never propagated, so fix it or correct the comment; (2) `Drop auth-setup results` greps `auth.setup.ts` as a substring across all result JSON, so any future file merely mentioning that path in a stack trace is dropped silently; (3) all actions still emit Node 20 deprecation warnings and are already forced onto Node 24; (4) only the latest report is browsable — old trend points have no report behind them. Also: nightly already runs `k6 run tests/performance/login.smoke.js`, so the M4 k6 item starts partially done, and the quarantine job is currently empty (mechanism last exercised by the probe in run 30298837346) |
 
 ---
 
