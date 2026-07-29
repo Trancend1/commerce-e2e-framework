@@ -14,9 +14,27 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   // json is always on: scripts/check-flake.mjs reads it to enforce the zero-flaky budget, and a
   // reporter that only exists in CI cannot be verified locally before you push.
+  //
+  // Allure is opt-in locally via ALLURE=1 rather than always-on, because its writer only creates
+  // `allure-results` and never clears it — repeated local runs would pile up stale results and
+  // generate a report describing tests that no longer exist. CI gets a fresh runner every time,
+  // so there it is safe to leave on.
   reporter: [
     ['html'],
     ['json', { outputFile: process.env.PW_JSON_REPORT ?? 'test-results/report.json' }],
+    ...(process.env.CI || process.env.ALLURE
+      ? [
+          [
+            'allure-playwright',
+            {
+              resultsDir: 'allure-results',
+              // Which SUT produced this report — otherwise a published report cannot be told
+              // apart from one run against a different environment.
+              environmentInfo: { WEB_URL: env.baseUrl, API_URL: env.apiUrl },
+            },
+          ] as const,
+        ]
+      : []),
     ...(process.env.CI ? [['github'] as const] : []),
   ],
   use: {
