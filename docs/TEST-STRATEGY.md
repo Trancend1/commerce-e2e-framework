@@ -25,7 +25,27 @@ Why not test everything through the UI? UI tests are the slowest and most fragil
 | Gate    | When          | Content                                                  | Blocking?                    |
 | ------- | ------------- | -------------------------------------------------------- | ---------------------------- |
 | PR gate | every push/PR | lint → Newman contract → `@smoke` UI (Chromium, sharded) | **Yes** — required check     |
-| Nightly | cron          | full UI (3 browsers) + full API + k6 load                | No, but failures open issues |
+| Nightly | cron          | full UI (3 browsers) + full API + k6                     | No, but failures open issues |
+
+## 3a. Performance budgets
+
+k6 exits non-zero when a threshold breaks, so these budgets fail the job rather than merely being printed.
+
+**State today:** only the login smoke exists, and it runs nightly. Search, checkout, the load profiles and the PR-gate smoke land with the M4 k6 track — the table below is the target that track is measured against, and the gate table above describes what actually runs.
+
+| Journey  | Budget           | Profile                   |
+| -------- | ---------------- | ------------------------- |
+| Login    | `p(95) < 400ms`  | smoke on PR, load nightly |
+| Search   | `p(95) < 500ms`  | smoke on PR, load nightly |
+| Checkout | `p(95) < 1200ms` | smoke only                |
+
+`http_req_failed: rate==0` applies to every scenario — a fast error is still an error.
+
+Read paths and write paths get different budgets on purpose: a single number for both is guaranteed to be wrong on one side. The login budget was 800ms against an observed `p(95)` of ~142ms on the CI runner, which is 5.6× headroom — a threshold that cannot break is decoration, so it was tightened to 400ms. All three numbers are starting points, to be tightened once several nightlies have produced a trend.
+
+**Load profile:** ramping 0 → 20 VU over 2 minutes, hold 1 minute, ramp down. [TEST-PLAN.md](TEST-PLAN.md) §4 puts anything beyond 50 VU out of scope, and the ceiling here is lower still because the runner hosts the SUT alongside k6 on 2 vCPUs — past roughly 20 VU the p95 measures runner saturation rather than the application, which would make the threshold noise. A `constant-arrival-rate` model is the more correct way to express a latency SLO, since load stops backing off when the app slows down; it is the upgrade path if ramping VUs prove too coarse.
+
+**Checkout stays smoke-only.** A load profile against checkout writes hundreds of orders into the SUT database. The container is fresh per run so nothing leaks between runs, but that volume changes the conditions being measured _within_ the run.
 
 ## 4. Environments
 
@@ -57,4 +77,4 @@ Real defects found in the SUT are documented in [bug-reports/](bug-reports/) usi
 
 ## 8. Decision log
 
-Significant choices are recorded as ADRs in [adr/](adr/): [ADR-001 Playwright over Cypress](adr/ADR-001-playwright-over-cypress.md), [ADR-002 API-based data seeding](adr/ADR-002-api-based-data-seeding.md).
+Significant choices are recorded as ADRs in [adr/](adr/): [ADR-001 Playwright over Cypress](adr/ADR-001-playwright-over-cypress.md), [ADR-002 API-based data seeding](adr/ADR-002-api-based-data-seeding.md), [ADR-003 accessibility scope and budget](adr/ADR-003-accessibility-scope-and-budget.md), [ADR-004 visual baselines are CI-generated](adr/ADR-004-visual-baselines-are-ci-generated.md).

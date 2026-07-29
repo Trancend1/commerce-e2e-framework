@@ -102,11 +102,13 @@ M3 exited when:
 - [x] Quarantine mechanism: `@quarantine` excluded via `grepInvert` in `playwright.config.ts` (config, so no CI command can forget it), still executed by the nightly `quarantine` job, expiry enforced by `scripts/check-quarantine.mjs`. Exclusion proven by nightly `tests/ui` counting 8 tests instead of 9 with a probe present (run 30298837346), gates clean once the probe was deleted (run 30391082024)
 - [x] Flake observable — `scripts/check-flake.mjs` reads the json report and fails on any `flaky` status in both gates, since Playwright itself exits 0 on a retry pass. The `< 2%` budget was replaced with a binary zero, because on a suite this size one flaky test is already 5%
 
-**M4 (active) — provisional, pending orchestrator confirmation.** Mirrors the M4 items in `docs/ROADMAP.md`; the threshold numbers are not decided yet:
+**M4 (active) — confirmed by the orchestrator 2026-07-29.** Budgets live in `docs/TEST-STRATEGY.md` §3a, the two decisions with real trade-offs in ADR-003 and ADR-004:
 
-- [ ] k6 covers search and checkout, not only login; load profiles (`*.load.js`) exist and run nightly; smoke runs on PRs. Thresholds themselves are already in place and already fail the job — `login.smoke.js` sets `http_req_failed: rate==0` and `p(95)<800`, so what is open here is scope, not enforcement. p95 budgets for search and checkout are undecided
-- [ ] axe-core scan on key pages, with the violation budget stated rather than "no serious violations" by accident
-- [ ] Visual regression on catalog + checkout, with a documented answer for how snapshots are updated and reviewed
+- [ ] k6 covers login, search and checkout with the budgets in TEST-STRATEGY §3a (login tightened 800ms → 400ms, since 800 against an observed 142ms could not break); login and search get the ramping 0 → 20 VU load profile nightly, checkout stays smoke-only because a load profile would write hundreds of orders into the database being measured; smoke runs on PRs. Thresholds already fail the job — k6 exits non-zero on a breach — so what is open is scope, not enforcement
+- [ ] axe-core scan on login, catalog, product detail and checkout: zero `serious` or `critical`, `moderate`/`minor` reported but non-blocking (ADR-003). A red first run is a finding for `docs/bug-reports/`, not a failed milestone
+- [ ] Visual regression on the catalog list and checkout step 1, chromium, nightly only, `maxDiffPixelRatio: 0.01`, baselines generated in CI and updated through a PR (ADR-004). If nightly diffs prove unstable, demote to Icebox with the evidence rather than raising tolerance until it passes
+
+Execution order is k6 → axe → visual, one PR each.
 
 ### 2.5 Phase Log
 
@@ -125,6 +127,7 @@ M3 exited when:
 - **Performance:** k6
 - **CI/CD:** GitHub Actions (matrix sharding, Pages deploy)
 - **Reporting:** Playwright HTML + Allure
+- **Accessibility:** @axe-core/playwright (approved 2026-07-29 for M4 — the only dependency M4 adds; visual regression uses Playwright's built-in `toHaveScreenshot`, k6 arrives as a binary via its action)
 - **Test data:** @faker-js/faker + API seeding (ADR-002)
 - **SUT:** Toolshop via Docker Compose (local only)
 
