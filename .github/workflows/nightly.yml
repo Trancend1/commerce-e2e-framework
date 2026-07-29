@@ -103,9 +103,16 @@ jobs:
       # Load profiles for the read paths; checkout stays a smoke because a load profile there
       # writes hundreds of orders into the database whose latency is being measured
       # (docs/TEST-STRATEGY.md §3a).
+      #
+      # `if: always()` on the later steps because nightly exists to observe. Without it the first
+      # breached budget aborts the job and the remaining journeys report nothing — which is exactly
+      # what happened on run 30452593269, where a login breach hid search and checkout entirely.
+      # The job still fails; it just fails with the full picture.
       - run: k6 run tests/performance/login.load.js
       - run: k6 run tests/performance/search.load.js
+        if: always()
       - run: k6 run tests/performance/checkout.smoke.js
+        if: always()
 
   # Merge every suite's results into one Allure report and publish it. `if: always()` because a
   # red nightly is precisely when the report is worth reading.
