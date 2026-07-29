@@ -10,7 +10,11 @@ export const options = {
   iterations: 5,
   thresholds: {
     http_req_failed: ['rate==0'],
-    http_req_duration: ['p(95)<800'], // budget: p95 under 800ms even on cold local runs
+    // Budget per docs/TEST-STRATEGY.md §3a, calibrated on the CI runner, where p(95) sits around
+    // 140ms. The previous 800ms left 5.6x headroom and could not break, which made it decoration
+    // rather than a gate. A cold local run is slower than CI; if this proves noisy there, the
+    // number moves on evidence, not on convenience.
+    http_req_duration: ['p(95)<400'],
   },
 };
 
