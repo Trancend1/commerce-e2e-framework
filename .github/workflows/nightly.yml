@@ -195,7 +195,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           previous=$(gh run list --workflow=nightly.yml --branch=main --status=success \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
+            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
           if [ -z "$previous" ]; then
             echo "no earlier successful nightly — starting a fresh site"
           elif gh run download "$previous" --name published-site --dir site; then
