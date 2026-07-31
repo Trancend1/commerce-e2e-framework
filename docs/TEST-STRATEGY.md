@@ -79,4 +79,6 @@ Real defects found in the SUT are documented in [bug-reports/](bug-reports/) usi
 
 ## 8. Decision log
 
-Significant choices are recorded as ADRs in [adr/](adr/): [ADR-001 Playwright over Cypress](adr/ADR-001-playwright-over-cypress.md), [ADR-002 API-based data seeding](adr/ADR-002-api-based-data-seeding.md), [ADR-003 accessibility scope and budget](adr/ADR-003-accessibility-scope-and-budget.md), [ADR-004 visual baselines are CI-generated](adr/ADR-004-visual-baselines-are-ci-generated.md).
+Significant choices are recorded as ADRs in [adr/](adr/): [ADR-001 Playwright over Cypress](adr/ADR-001-playwright-over-cypress.md), [ADR-002 API-based data seeding](adr/ADR-002-api-based-data-seeding.md), [ADR-003 accessibility scope and budget](adr/ADR-003-accessibility-scope-and-budget.md), [ADR-004 visual baselines are CI-generated](adr/ADR-004-visual-baselines-are-ci-generated.md), [ADR-005 baseline updates are handed back as an artifact](adr/ADR-005-baseline-updates-are-handed-back-as-an-artifact.md).
+
+Reversible choices with a documented rationale — the zero-flaky budget (§7), quarantine mechanics (§5), report retention — stay in these strategy docs rather than becoming ADRs. See [adr/README.md](adr/README.md) for where that line sits.

@@ -2,6 +2,8 @@
 
 **Status:** Accepted · **Date:** 2026-07
 
+> **Partially superseded by [ADR-005](ADR-005-baseline-updates-are-handed-back-as-an-artifact.md).** The update mechanism below — "a `workflow_dispatch` job … opens a pull request" — collides with `CLAUDE.md` §4.6, which forbids bot-authored commits. The workflow uploads an artifact that a human commits instead. Everything else in this ADR still holds.
+
 ## Context
 
 M4 adds visual regression via Playwright's `toHaveScreenshot`. Screenshots are not portable: font rasterization differs between the Windows machine this repo is developed on and the Linux runner that executes CI, so a baseline captured locally fails in CI for reasons that have nothing to do with the application.
