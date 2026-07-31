@@ -31,8 +31,10 @@ bash scripts/sut-up.sh   # Toolshop UI on :4200, API on :8091
 # 4. Run
 npm run test:api       # API contract + integration
 npm run test:ui        # UI E2E (Chromium)
-npm run test:perf      # k6 smoke
+npm run test:perf      # k6 smoke — needs k6 installed, see below
 ```
+
+`test:perf` shells out to **k6**, which is a standalone binary rather than an npm dependency, so `npm ci` does not provide it — install it from [k6.io/docs/get-started/installation](https://grafana.com/docs/k6/latest/set-up/install-k6/) first. CI installs it through the k6 action, which is why the gate never noticed. The other three commands need nothing beyond the steps above.
 
 ## Case study: what this framework caught, and what it cost
 
