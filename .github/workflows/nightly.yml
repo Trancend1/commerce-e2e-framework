@@ -270,19 +270,38 @@ jobs:
       # workflow artifact rather than a gh-pages branch, keeping the nightly out of the repo's
       # commit history. A missing artifact is not fatal: retention expires, and the very first run
       # has nothing to restore — the site simply starts over with this run's report.
+      # Any *completed* nightly may have published, not only a green one: this job runs
+      # `if: always()` precisely so a red night still deploys its report. Selecting the previous
+      # site by run conclusion contradicted that — a red night would publish, then the next night
+      # would restore from the last green one and drop it, leaving the red run's own trend point
+      # pointing at a report that no longer existed. Walk back over completed runs instead and take
+      # the first that actually carries the artifact; expired retention and runs that never got as
+      # far as uploading simply fall through.
+      #
+      # The window has to be deeper than the longest plausible streak of nightlies that published
+      # nothing, or the site restarts from this run alone — the old rule searched for a success at
+      # any depth and had no such limit. Runs 35-37 were exactly such a streak (their `report` jobs
+      # failed, so none uploaded), which a window of 5 would have survived with one to spare. Ten
+      # is that with room, and the cost is one extra API page.
       - name: Restore the previously published site
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          previous=$(gh run list --workflow=nightly.yml --branch=main --status=success \
-            --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-          if [ -z "$previous" ]; then
-            echo "no earlier successful nightly — starting a fresh site"
-          elif gh run download "$previous" --name published-site --dir site; then
-            echo "restored the site published by run $previous"
-          else
-            echo "run $previous published no site artifact — starting a fresh site"
-          fi
+          candidates=$(gh run list --workflow=nightly.yml --branch=main --status=completed \
+            --limit 10 --json databaseId \
+            --jq ".[].databaseId | select(. != ${{ github.run_id }})")
+          for previous in $candidates; do
+            # A failed download can leave a partial directory behind, which would then be merged
+            # into by the next attempt.
+            rm -rf site
+            if gh run download "$previous" --name published-site --dir site; then
+              echo "restored the site published by run $previous"
+              exit 0
+            fi
+            echo "run $previous published no site artifact — trying the one before it"
+          done
+          rm -rf site
+          echo "no earlier nightly carried a site artifact — starting a fresh site"
 
       # --keep bounds the site: past that, the oldest reports fall off and their trend points go
       # stale. Twenty nights is roughly three weeks of history, which is longer than any flake
