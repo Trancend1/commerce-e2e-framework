@@ -36,7 +36,7 @@
 - [x] 3–5 real defects documented in [bug-reports/](bug-reports/) — [BUG-001](bug-reports/BUG-001-checkout-proceed-swallowed-during-postcode-lookup.md) (checkout race, from the M2 flake), [BUG-002](bug-reports/BUG-002-login-password-reveal-button-has-no-accessible-name.md) and [BUG-003](bug-reports/BUG-003-catalog-filter-lists-contain-fieldsets.md) (first a11y scan). Target met at three; none will be manufactured to pad the count
 - [x] ADR set complete (001–005) — "complete" defined in [adr/README.md](adr/README.md): every significant _and_ hard-to-reverse decision has an ADR; reversible ones stay in the strategy docs. Audit closed the one real gap with [ADR-005](adr/ADR-005-baseline-updates-are-handed-back-as-an-artifact.md), which supersedes ADR-004's update mechanism
 - [x] README case-study section: what this framework caught & what I learned
-- [ ] Repo topics/description set; fresh-clone quick start verified on a clean machine — topics and description **set**; fresh-clone verification still open
+- [x] Repo topics/description set; fresh-clone quick start verified — ten topics set 2026-07-31, description already present. Quick start run end to end from a fresh clone the same day: it failed twice and both gaps are fixed in [#16](https://github.com/Trancend1/commerce-e2e-framework/pull/16) — `test:perf` needed k6 installed separately, and `addToCart()` raced the cart round-trip. **Not verified: a cold machine.** Caches and images were warm here, so the README no longer makes a timing claim it cannot back
 
 ## Icebox
 

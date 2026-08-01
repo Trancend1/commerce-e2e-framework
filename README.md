@@ -13,7 +13,9 @@ Layered QA automation framework for an e-commerce application — **Playwright +
 
 [Toolshop](https://github.com/testsmith-io/practice-software-testing) — a realistic Angular + Laravel REST API commerce app with Swagger docs, role-based auth (customer/admin), and intentionally seeded defects. Runs locally via Docker.
 
-## Quick start (< 5 minutes)
+## Quick start
+
+Verified end to end from a fresh clone on 2026-07-31 — the run that produced [#16](https://github.com/Trancend1/commerce-e2e-framework/pull/16). On a machine that already has the npm cache, the Playwright browsers and the Toolshop images, steps 1–4 take about two minutes. A genuinely cold machine additionally downloads Chromium and roughly a gigabyte of Docker images, which is the part no timing claim here covers.
 
 ```bash
 # 1. Clone & install
